@@ -141,3 +141,89 @@ Note: it's not a typo, it's `tip` , not `trip`
 
 
 ## Terraform
+### main.tf file
+```terraform
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.6.0"
+    }
+  }
+}
+
+provider "google" {
+  #credentials = file(var.credentials)
+  project     = var.project
+  region      = var.region
+}
+
+
+resource "google_storage_bucket" "demo-bucket" {
+  name          = var.gcs_bucket_name
+  location      = var.location
+  force_destroy = true
+
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
+}
+
+
+
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = var.bq_dataset_name
+  location   = var.location
+}
+```
+
+### variables.tf
+```terraform
+variable "credentials" {
+  description = "My Credentials"
+  default     = "<Path to your Service Account json file>"
+  #ex: if you have a directory where this file is called keys with your service account json file
+  #saved there as my-creds.json you could use default = "./keys/my-creds.json"
+}
+
+
+variable "project" {
+  description = "Project"
+  default     = "dtc-de-course-2024-411721"
+}
+
+variable "region" {
+  description = "Region"
+  #Update the below to your desired region
+  default     = "us-central1"
+}
+
+variable "location" {
+  description = "Project Location"
+  #Update the below to your desired location
+  default     = "US"
+}
+
+variable "bq_dataset_name" {
+  description = "My BigQuery Dataset Name"
+  #Update the below to what you want your dataset to be called
+  default     = "zoomcamp_demo_1_dataset"
+}
+
+variable "gcs_bucket_name" {
+  description = "My Storage Bucket Name"
+  #Update the below to a unique bucket name
+  default     = "zoomcamp-demo-bucketname"
+}
+
+variable "gcs_storage_class" {
+  description = "Bucket Storage Class"
+  default     = "STANDARD"
+}
+```
